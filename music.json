@@ -1,1 +1,4 @@
-[]
+[
+    { "title": "Sample Track 1", "artist": "Artist A", "genre": "Pop", "type": "Single", "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { "title": "Sample Track 2", "artist": "Artist B", "genre": "Rock", "type": "Album", "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }
+]

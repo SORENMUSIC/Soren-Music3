@@ -1,0 +1,142 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soren Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="bg-indigo-800 text-white py-4 sticky top-0 z-10">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Soren Music</h1>
+            <ul class="flex space-x-6">
+                <li><a href="#home" class="hover:text-indigo-200">Home</a></li>
+                <li><a href="#upload" class="hover:text-indigo-200">Upload</a></li>
+                <li><a href="#gallery" class="hover:text-indigo-200">Gallery</a></li>
+                <li><a href="#about" class="hover:text-indigo-200">About</a></li>
+                <li><a href="#contact" class="hover:text-indigo-200">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="bg-indigo-600 text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Soren Music</h2>
+            <p class="text-lg md:text-xl mb-6">Explore and share your music with the world.</p>
+            <a href="#upload" class="bg-white text-indigo-600 px-6 py-3 rounded-full font-semibold hover:bg-indigo-100">View Gallery</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">About Us</h2>
+            <p class="text-lg text-gray-700 max-w-3xl mx-auto text-center">
+                Soren Music is your platform to showcase musical talent. Currently, it features a gallery of tracks—upload functionality will be added later.
+            </p>
+        </div>
+    </section>
+
+    <!-- Upload Section (Static for now) -->
+    <section id="upload" class="bg-gray-200 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Upload Music</h2>
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-lg mx-auto text-center">
+                <p class="text-gray-600">Upload feature coming soon! For now, enjoy the gallery below.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Music Gallery -->
+    <section id="gallery" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Music Gallery</h2>
+            <div id="musicGallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Music cards will be added dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="bg-indigo-800 text-white py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-8">Contact Us</h2>
+            <div class="max-w-lg mx-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium">Name</label>
+                        <input type="text" id="name" class="mt-1 w-full p-2 border rounded-md bg-gray-100 text-gray-800" disabled>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium">Email</label>
+                        <input type="email" id="email" class="mt-1 w-full p-2 border rounded-md bg-gray-100 text-gray-800" disabled>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium">Message</label>
+                        <textarea id="message" class="mt-1 w-full p-2 border rounded-md bg-gray-100 text-gray-800" rows="4" disabled></textarea>
+                    </div>
+                    <button class="w-full bg-white text-indigo-600 py-2 rounded-md font-semibold hover:bg-indigo-100" disabled>Contact coming soon</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2025 Soren Music. All rights reserved.</p>
+            <div class="mt-2">
+                <a href="#" class="text-indigo-300 hover:text-indigo-100 mx-2"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-indigo-300 hover:text-indigo-100 mx-2"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="text-indigo-300 hover:text-indigo-100 mx-2"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/script.js"></script>
+</body>
+</html>

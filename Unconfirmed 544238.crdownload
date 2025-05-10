@@ -1,0 +1,55 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadForm = document.getElementById('uploadForm');
+    const musicGallery = document.getElementById('musicGallery');
+
+    // Load music on page load
+    fetchMusic();
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(uploadForm);
+        
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok) {
+                uploadForm.reset();
+                fetchMusic();
+            } else {
+                alert(result.error || 'Upload failed');
+            }
+        } catch (err) {
+            alert('Error uploading file');
+        }
+    });
+
+    // Fetch and display music
+    async function fetchMusic() {
+        try {
+            const response = await fetch('/api/music');
+            const music = await response.json();
+            musicGallery.innerHTML = '';
+            music.forEach((track) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-lg shadow-md';
+                card.innerHTML = `
+                    <h3 class="text-xl font-semibold text-indigo-600">${track.title}</h3>
+                    <p class="text-gray-600">Artist: ${track.artist}</p>
+                    <p class="text-gray-600">Genre: ${track.genre.charAt(0).toUpperCase() + track.genre.slice(1)}</p>
+                    <p class="text-gray-600">Type: ${track.type.charAt(0).toUpperCase() + track.type.slice(1)}</p>
+                    <audio controls class="w-full mt-4">
+                        <source src="${track.audioUrl}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                `;
+                musicGallery.appendChild(card);
+            });
+        } catch (err) {
+            console.error('Error fetching music:', err);
+        }
+    }
+});

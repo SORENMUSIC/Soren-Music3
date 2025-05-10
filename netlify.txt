@@ -1,0 +1,7 @@
+[build]
+  command = "npm install"
+  functions = "server.js"
+  publish = "public"
+
+[dev]
+  command = "npm start"
